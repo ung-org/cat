@@ -24,7 +24,7 @@
 
 #define _XOPEN_SOURCE 700
 #include <errno.h>
-#include <nl_types.h>
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -38,13 +38,7 @@ static int cat(const char *path)
 	}
 
 	if (f == NULL) {
-		static char *fmt = NULL;
-		const char *def = "cat: %s: %s\n";
-		if (fmt == NULL) {
-			nl_catd catd = catopen("cat", NL_CAT_LOCALE);
-			fmt = catgets(catd, NL_SETD, 1, def);
-		}
-		fprintf(stderr, fmt, path ? path : "stdin", strerror(errno));
+		fprintf(stderr, "cat: %s: %s\n", path, strerror(errno));
 		return 1;
 	}
 
@@ -62,25 +56,23 @@ static int cat(const char *path)
 
 int main(int argc, char *argv[])
 {
-	int ret = 0, c = 0;
+	setlocale(LC_ALL, "");
 
+	int c;
 	while ((c = getopt(argc, argv, "u")) != -1) {
 		switch(c) {
 		case 'u':	/** Do not buffer output **/
 			setbuf(stdout, NULL);
 			break;
+
 		default:
 			return 1;
 		}
 	}
 
+	int ret = 0;
 	do {
 		ret |= cat(argv[optind++]);
 	} while (optind < argc);
-
 	return ret;
 }
-
-/**cat en_US@color
-1 \033[31mcat: Couldn't open \033[0;41;23m%s\033[0;31m: %s\033[0m\n
-**/
