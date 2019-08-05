@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#define _XOPEN_SOURCE 700
+#define _POSIX_C_SOURCE 2
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
